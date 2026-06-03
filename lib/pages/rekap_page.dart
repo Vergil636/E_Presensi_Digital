@@ -8,6 +8,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 
 import '../services/supabase_service.dart';
+import '../widgets/dashboard_back_button.dart';
 
 class RekapPage extends StatefulWidget {
   const RekapPage({super.key});
@@ -242,19 +243,28 @@ class _RekapPageState extends State<RekapPage> {
     });
   }
 
-  String _safeDate(dynamic v, {bool onlyDate = false}) {
+  String _safeDate(dynamic v, {bool onlyDate = false, bool onlyTime = false}) {
     if (v == null) return '-';
     if (v is DateTime) {
-      return onlyDate
-          ? DateFormat('dd MMM yyyy', 'id_ID').format(v)
-          : DateFormat('dd MMM yyyy HH:mm', 'id_ID').format(v);
+      if (onlyDate) {
+        return DateFormat('dd MMM yyyy', 'id_ID').format(v);
+      } else if (onlyTime) {
+        return DateFormat('HH:mm').format(v);
+      } else {
+        return DateFormat('dd MMM yyyy HH:mm', 'id_ID').format(v);
+      }
     }
     // Supabase biasanya kirim string ISO
     final dt = DateTime.tryParse(v.toString());
     if (dt == null) return '-';
-    return onlyDate
-        ? DateFormat('dd MMM yyyy', 'id_ID').format(dt.toLocal())
-        : DateFormat('dd MMM yyyy HH:mm', 'id_ID').format(dt.toLocal());
+    
+    if (onlyDate) {
+      return DateFormat('dd MMM yyyy', 'id_ID').format(dt.toLocal());
+    } else if (onlyTime) {
+      return DateFormat('HH:mm').format(dt.toLocal());
+    } else {
+      return DateFormat('dd MMM yyyy HH:mm', 'id_ID').format(dt.toLocal());
+    }
   }
 
   int _safeInt(dynamic v) {
@@ -274,6 +284,7 @@ class _RekapPageState extends State<RekapPage> {
         elevation: 1,
         title: const Text('Rekap Absensi Harian'),
         actions: [
+          const DashboardBackButton(),
           IconButton(
             tooltip: 'Pilih Rentang Tanggal',
             icon: const Icon(Icons.calendar_today),

@@ -1,0 +1,39 @@
+# Flutter/Dart related
+.dart_tool/
+.packages
+.pub/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Build artifacts
+build/
+!build/web
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+test/
+coverage/
+
+# Documentation
+*.md
+!README.md
+
+# Native
+android/
+ios/
+linux/
+macos/
+windows/
+
+# Specs
+.kiro/

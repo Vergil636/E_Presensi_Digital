@@ -22,11 +22,20 @@ dependencies:
   qr_flutter: ^4.1.0
   mobile_scanner: ^6.0.1
 
+  # --- Geolocation ---
+  geolocator: ^13.0.2
+  geocoding: ^3.0.0
+
   # --- Utilitas ---
   intl: ^0.19.0
   flutter_hooks: ^0.20.5
   # --- PDF export ---
   pdf: ^3.10.1
+  printing: ^5.13.4
+  path_provider: ^2.1.5
+
+  # --- Charts ---
+  fl_chart: ^0.69.0
 
 dev_dependencies:
   flutter_test:
@@ -38,3 +47,5 @@ flutter:
 
   assets:
     - assets/images/logo.png   # pastikan file ini benar-benar ada; kalau belum, hapus baris ini
+    - assets/images/signature_budi.png
+    - assets/images/signature_iskandar.png

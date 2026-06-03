@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart'; // ✅ Tambahkan ini
 
 // PAGES
-import 'pages/login_page.dart';
+import 'pages/unified_login_page.dart';
 import 'pages/dashboard_page.dart';
 
 // ====== KONFIGURASI SUPABASE ======
@@ -33,23 +33,25 @@ Future<void> main() async {
 class AbsensiApp extends StatelessWidget {
   const AbsensiApp({super.key});
 
+  // Key global agar AuthWatcher bisa navigate tanpa context dari builder
+  static final navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     final client = Supabase.instance.client;
 
     return MaterialApp(
+      navigatorKey: AbsensiApp.navigatorKey,
       debugShowCheckedModeBanner: false,
-      title: 'Absensi QR',
+      title: 'E-Absensi Cv.Tanjung Agung',
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.green,
         brightness: Brightness.light,
       ),
-      // Awal: cek session sekali
       home: client.auth.currentSession == null
-          ? const LoginPage()
+          ? const UnifiedLoginPage()
           : const DashboardPage(),
-      // Dengarkan perubahan sesi (login/logout) dan alihkan otomatis
       builder: (context, child) {
         return AuthWatcher(child: child ?? const SizedBox.shrink());
       },
@@ -75,20 +77,18 @@ class _AuthWatcherState extends State<AuthWatcher> {
     _authSub = Supabase.instance.client.auth.onAuthStateChange;
     _authSub.listen((event) {
       final session = event.session;
-      // Bila login sukses → ke Dashboard, bila logout → ke Login
-      if (mounted) {
-        final nav = Navigator.of(context);
-        if (session != null) {
-          nav.pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const DashboardPage()),
-            (route) => false,
-          );
-        } else {
-          nav.pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const LoginPage()),
-            (route) => false,
-          );
-        }
+      final nav = AbsensiApp.navigatorKey.currentState;
+      if (nav == null) return;
+      if (session != null) {
+        nav.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const DashboardPage()),
+          (route) => false,
+        );
+      } else {
+        nav.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const UnifiedLoginPage()),
+          (route) => false,
+        );
       }
     });
   }

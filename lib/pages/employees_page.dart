@@ -7,6 +7,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter/services.dart';
 
 import '../services/supabase_service.dart';
+import '../widgets/dashboard_back_button.dart';
 
 class EmployeesPage extends StatefulWidget {
   const EmployeesPage({super.key});
@@ -198,7 +199,9 @@ class _EmployeesPageState extends State<EmployeesPage> {
       appBar: AppBar(
         title: const Text('Daftar Pegawai'),
         actions: [
+          const DashboardBackButton(),
           IconButton(onPressed: _load, icon: const Icon(Icons.refresh)),
+          const SizedBox(width: 8),
         ],
       ),
       body: Column(
