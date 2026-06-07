@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "outputDirectory": "build/web",
   "buildCommand": "",
+  "outputDirectory": ".",
   "installCommand": "",
   "framework": null,
   "routes": [
