@@ -1,13 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "",
-  "outputDirectory": ".",
-  "installCommand": "",
-  "framework": null,
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
