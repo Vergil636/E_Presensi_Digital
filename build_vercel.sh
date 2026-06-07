@@ -2,12 +2,17 @@
 set -e
 
 echo "=== Installing Flutter SDK ==="
-git clone https://github.com/flutter/flutter.git --depth 1 -b stable /opt/flutter
+if [ ! -d "/opt/flutter" ]; then
+  git clone https://github.com/flutter/flutter.git --depth 1 -b stable /opt/flutter
+fi
+
 export PATH="$PATH:/opt/flutter/bin"
 
-echo "=== Flutter Doctor ==="
-flutter doctor --android-licenses || true
-flutter doctor
+echo "=== Flutter Version ==="
+flutter --version
+
+echo "=== Accepting Licenses ==="
+yes | flutter doctor --android-licenses || true
 
 echo "=== Installing Dependencies ==="
 flutter pub get

@@ -2,7 +2,7 @@
   "version": 2,
   "buildCommand": "bash build_vercel.sh",
   "outputDirectory": "build/web",
-  "installCommand": "echo 'skip npm install'",
+  "installCommand": "echo skip",
   "framework": null,
   "routes": [
     {
