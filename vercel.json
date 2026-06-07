@@ -1,7 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "flutter build web --release --web-renderer canvaskit",
+  "buildCommand": "bash build_vercel.sh",
   "outputDirectory": "build/web",
+  "installCommand": "echo 'skip npm install'",
   "framework": null,
   "routes": [
     {
