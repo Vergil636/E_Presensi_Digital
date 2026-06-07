@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "bash build_vercel.sh",
   "outputDirectory": "build/web",
-  "installCommand": "echo skip",
+  "buildCommand": "",
+  "installCommand": "",
   "framework": null,
   "routes": [
     {
