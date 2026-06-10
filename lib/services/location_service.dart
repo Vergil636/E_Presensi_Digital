@@ -1,11 +1,11 @@
 // lib/services/location_service.dart
-import 'dart:async';
 import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
 /// Service untuk mendapatkan lokasi GPS dan reverse geocoding
 class LocationService {
+  // Distancematrix.ai Geocoding API Key
   static const String _apiKey =
       '7t0bBS9rSfXtKQFsewtZ1gTafCMRt6BdCjLJgI83lFE9PmEKjfisCxnIz45EVVyr';
 
@@ -48,8 +48,8 @@ class LocationService {
     );
   }
 
-  /// Reverse geocoding menggunakan Distancematrix.ai
-  /// Menggunakan http package (async) - bekerja di web dan mobile
+  /// Reverse geocoding menggunakan Distancematrix.ai Geocoding API
+  /// Konversi koordinat (lat, lng) → nama alamat lengkap
   static Future<String> getAddressFromCoordinates(
     double latitude,
     double longitude,
@@ -63,40 +63,39 @@ class LocationService {
 
       final response = await http.get(uri, headers: {
         'Accept': 'application/json'
-      }).timeout(const Duration(seconds: 15));
+      }).timeout(const Duration(seconds: 10));
 
-      if (response.statusCode != 200) {
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        // Cek status API
+        final status = data['status'];
+        if (status != 'OK') {
+          return _fallbackAddress(latitude, longitude);
+        }
+
+        // Distancematrix.ai pakai key "result" (bukan "results")
+        final results = data['result'] as List?;
+        if (results == null || results.isEmpty) {
+          return _fallbackAddress(latitude, longitude);
+        }
+
+        // Ambil formatted_address dari hasil pertama (paling akurat)
+        final formattedAddress =
+            results[0]['formatted_address']?.toString() ?? '';
+        if (formattedAddress.isNotEmpty) {
+          return formattedAddress;
+        }
+
+        // Fallback: parse dari address_components
+        final components = results[0]['address_components'] as List?;
+        if (components != null && components.isNotEmpty) {
+          return _parseAddressComponents(components);
+        }
+
         return _fallbackAddress(latitude, longitude);
       }
 
-      final data = json.decode(response.body);
-
-      // Cek status API
-      if (data['status'] != 'OK') {
-        return _fallbackAddress(latitude, longitude);
-      }
-
-      // Distancematrix.ai pakai key "result" (bukan "results")
-      final results = data['result'] as List?;
-      if (results == null || results.isEmpty) {
-        return _fallbackAddress(latitude, longitude);
-      }
-
-      // Ambil formatted_address (paling lengkap)
-      final formattedAddress =
-          results[0]['formatted_address']?.toString() ?? '';
-      if (formattedAddress.isNotEmpty) {
-        return formattedAddress;
-      }
-
-      // Fallback: parse dari address_components
-      final components = results[0]['address_components'] as List?;
-      if (components != null && components.isNotEmpty) {
-        return _parseAddressComponents(components);
-      }
-
-      return _fallbackAddress(latitude, longitude);
-    } on TimeoutException {
       return _fallbackAddress(latitude, longitude);
     } catch (e) {
       return _fallbackAddress(latitude, longitude);
@@ -118,9 +117,7 @@ class LocationService {
 
       if (types.contains('route')) route = longName;
       if (types.contains('sublocality') ||
-          types.contains('sublocality_level_1')) {
-        sublocality = longName;
-      }
+          types.contains('sublocality_level_1')) sublocality = longName;
       if (types.contains('locality')) locality = longName;
       if (types.contains('administrative_area_level_2')) adminArea2 = longName;
       if (types.contains('administrative_area_level_1')) adminArea1 = longName;
@@ -136,7 +133,7 @@ class LocationService {
     return parts.isNotEmpty ? parts.join(', ') : 'Lokasi tidak dikenali';
   }
 
-  /// Fallback jika API gagal
+  /// Fallback jika API gagal - tampilkan koordinat
   static String _fallbackAddress(double lat, double lng) {
     return 'Lat: ${lat.toStringAsFixed(6)}, Lng: ${lng.toStringAsFixed(6)}';
   }
