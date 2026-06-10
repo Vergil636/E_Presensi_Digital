@@ -1,5 +1,4 @@
 import 'dart:html' as html;
-import 'dart:typed_data';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -12,11 +11,12 @@ class PdfService {
     required List<Map<String, dynamic>> items,
   }) async {
     final pdf = pw.Document();
-    
+
     // Load signature image
     pw.ImageProvider? signatureImage;
     try {
-      final signatureBytes = await rootBundle.load('assets/images/signature_budi.png');
+      final signatureBytes =
+          await rootBundle.load('assets/images/signature_budi.png');
       signatureImage = pw.MemoryImage(signatureBytes.buffer.asUint8List());
     } catch (e) {
       print('Failed to load signature image: $e');
@@ -25,11 +25,13 @@ class PdfService {
 
     // Format angka ribuan
     String formatCurrency(dynamic value) {
-      final amount = (value is num) ? value.toDouble() : double.tryParse(value.toString()) ?? 0;
+      final amount = (value is num)
+          ? value.toDouble()
+          : double.tryParse(value.toString()) ?? 0;
       return amount.toStringAsFixed(0).replaceAllMapped(
-        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-        (m) => '${m[1]}.',
-      );
+            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+            (m) => '${m[1]}.',
+          );
     }
 
     // Format tanggal
@@ -74,11 +76,13 @@ class PdfService {
                 children: [
                   pw.Text(
                     'Tanggal',
-                    style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                    style: const pw.TextStyle(
+                        fontSize: 10, color: PdfColors.grey700),
                   ),
                   pw.Text(
                     formatDate(invoice['created_at']),
-                    style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+                    style: pw.TextStyle(
+                        fontSize: 12, fontWeight: pw.FontWeight.bold),
                   ),
                 ],
               ),
@@ -99,25 +103,30 @@ class PdfService {
               children: [
                 pw.Text(
                   'Kepada:',
-                  style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                  style: const pw.TextStyle(
+                      fontSize: 10, color: PdfColors.grey700),
                 ),
                 pw.SizedBox(height: 4),
                 pw.Text(
                   invoice['pelanggan'] ?? '-',
-                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                  style: pw.TextStyle(
+                      fontSize: 14, fontWeight: pw.FontWeight.bold),
                 ),
-                if (invoice['phone'] != null && invoice['phone'].toString().trim().isNotEmpty) ...[
+                if (invoice['phone'] != null &&
+                    invoice['phone'].toString().trim().isNotEmpty) ...[
                   pw.SizedBox(height: 4),
                   pw.Text(
                     'Telp: ${invoice['phone']}',
                     style: const pw.TextStyle(fontSize: 11),
                   ),
                 ],
-                if (invoice['catatan'] != null && invoice['catatan'].toString().trim().isNotEmpty) ...[
+                if (invoice['catatan'] != null &&
+                    invoice['catatan'].toString().trim().isNotEmpty) ...[
                   pw.SizedBox(height: 8),
                   pw.Text(
                     'Catatan: ${invoice['catatan']}',
-                    style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                    style: const pw.TextStyle(
+                        fontSize: 10, color: PdfColors.grey700),
                   ),
                 ],
               ],
@@ -149,9 +158,12 @@ class PdfService {
                 children: [
                   _buildTableCell('No', isHeader: true),
                   _buildTableCell('Nama Pekerjaan', isHeader: true),
-                  _buildTableCell('Qty', isHeader: true, align: pw.TextAlign.center),
-                  _buildTableCell('Harga Satuan', isHeader: true, align: pw.TextAlign.right),
-                  _buildTableCell('Subtotal', isHeader: true, align: pw.TextAlign.right),
+                  _buildTableCell('Qty',
+                      isHeader: true, align: pw.TextAlign.center),
+                  _buildTableCell('Harga Satuan',
+                      isHeader: true, align: pw.TextAlign.right),
+                  _buildTableCell('Subtotal',
+                      isHeader: true, align: pw.TextAlign.right),
                 ],
               ),
               // Items
@@ -191,7 +203,8 @@ class PdfService {
                 padding: const pw.EdgeInsets.all(16),
                 decoration: pw.BoxDecoration(
                   color: PdfColors.grey200,
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                  borderRadius:
+                      const pw.BorderRadius.all(pw.Radius.circular(8)),
                 ),
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -227,7 +240,8 @@ class PdfService {
                 padding: const pw.EdgeInsets.all(12),
                 decoration: pw.BoxDecoration(
                   border: pw.Border.all(color: PdfColors.blue300, width: 1.5),
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                  borderRadius:
+                      const pw.BorderRadius.all(pw.Radius.circular(8)),
                   color: PdfColors.blue50,
                 ),
                 child: pw.Column(
@@ -288,7 +302,8 @@ class PdfService {
                   pw.SizedBox(height: 4),
                   pw.Text(
                     'Owner',
-                    style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+                    style: pw.TextStyle(
+                        fontSize: 10, fontWeight: pw.FontWeight.bold),
                   ),
                   pw.SizedBox(height: 10),
                   // Gambar tanda tangan atau placeholder
@@ -320,7 +335,8 @@ class PdfService {
                   pw.SizedBox(height: 4),
                   pw.Text(
                     'Budi Hermawan',
-                    style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+                    style: pw.TextStyle(
+                        fontSize: 10, fontWeight: pw.FontWeight.bold),
                   ),
                 ],
               ),

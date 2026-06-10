@@ -70,7 +70,8 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> _refreshAll() async {
-    await Future.wait([_loadRule(), _loadKpisToday(), _loadInvoicesThisMonth()]);
+    await Future.wait(
+        [_loadRule(), _loadKpisToday(), _loadInvoicesThisMonth()]);
   }
 
   Future<void> _loadRule() async {
@@ -139,8 +140,8 @@ class _DashboardPageState extends State<DashboardPage> {
       for (final invoice in response as List) {
         final grandTotal = invoice['grand_total'];
         if (grandTotal != null) {
-          total += (grandTotal is num) 
-              ? grandTotal.toDouble() 
+          total += (grandTotal is num)
+              ? grandTotal.toDouble()
               : double.tryParse('$grandTotal') ?? 0;
         }
       }
@@ -167,10 +168,10 @@ class _DashboardPageState extends State<DashboardPage> {
 
     try {
       final timeStr = timeValue.toString();
-      
+
       // Parse ISO datetime string
       final dt = DateTime.parse(timeStr);
-      
+
       // Format ke HH:mm (24 jam)
       return DateFormat('HH:mm').format(dt);
     } catch (e) {
@@ -183,9 +184,9 @@ class _DashboardPageState extends State<DashboardPage> {
   String _formatRupiah(double value) {
     if (value == 0) return 'Rp 0';
     final formatted = value.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]}.',
-    );
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (m) => '${m[1]}.',
+        );
     return 'Rp $formatted';
   }
 
@@ -287,7 +288,8 @@ class _DashboardPageState extends State<DashboardPage> {
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+              border:
+                  Border.all(color: Colors.white.withOpacity(0.3), width: 2),
             ),
             child: const Icon(
               Icons.admin_panel_settings_rounded,
@@ -327,7 +329,8 @@ class _DashboardPageState extends State<DashboardPage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.25),
                   borderRadius: BorderRadius.circular(12),
@@ -336,7 +339,8 @@ class _DashboardPageState extends State<DashboardPage> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.access_time_rounded, size: 18, color: Colors.white),
+                    const Icon(Icons.access_time_rounded,
+                        size: 18, color: Colors.white),
                     const SizedBox(width: 8),
                     Text(
                       _timeText,
@@ -359,7 +363,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
                     padding: const EdgeInsets.all(6),
-                    child: const Icon(Icons.refresh_rounded, color: Colors.white, size: 20),
+                    child: const Icon(Icons.refresh_rounded,
+                        color: Colors.white, size: 20),
                   ),
                 ),
               ),
@@ -375,12 +380,28 @@ class _DashboardPageState extends State<DashboardPage> {
   // ─────────────────────────────────────────────────────────────────
   Widget _buildNavButtons() {
     final tabs = [
-      {'label': 'Presensi', 'icon': Icons.qr_code_scanner_rounded, 'color': Color(0xFF2196F3)},
-      {'label': 'Penggajian', 'icon': Icons.payments_rounded, 'color': Color(0xFF4CAF50)},
-      {'label': 'Invoice', 'icon': Icons.receipt_long_rounded, 'color': Color(0xFFFF9800)},
-      {'label': 'Kelola Mandor', 'icon': Icons.supervisor_account_rounded, 'color': Color(0xFF9C27B0)},
+      {
+        'label': 'Presensi',
+        'icon': Icons.qr_code_scanner_rounded,
+        'color': Color(0xFF2196F3)
+      },
+      {
+        'label': 'Penggajian',
+        'icon': Icons.payments_rounded,
+        'color': Color(0xFF4CAF50)
+      },
+      {
+        'label': 'Invoice',
+        'icon': Icons.receipt_long_rounded,
+        'color': Color(0xFFFF9800)
+      },
+      {
+        'label': 'Kelola Mandor',
+        'icon': Icons.supervisor_account_rounded,
+        'color': Color(0xFF9C27B0)
+      },
     ];
-    
+
     return Wrap(
       spacing: 12,
       runSpacing: 12,
@@ -388,7 +409,7 @@ class _DashboardPageState extends State<DashboardPage> {
         final selected = _activeTab == i;
         final tab = tabs[i];
         final color = tab['color'] as Color;
-        
+
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           child: Material(
@@ -410,7 +431,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   // Invoice → halaman terpisah
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const InvoiceBoronganPage()),
+                    MaterialPageRoute(
+                        builder: (_) => const InvoiceBoronganPage()),
                   );
                   return;
                 }
@@ -418,7 +440,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   // Kelola Mandor → halaman terpisah
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const MandorManagementPage()),
+                    MaterialPageRoute(
+                        builder: (_) => const MandorManagementPage()),
                   );
                   return;
                 }
@@ -428,7 +451,8 @@ class _DashboardPageState extends State<DashboardPage> {
               },
               borderRadius: BorderRadius.circular(16),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
@@ -581,18 +605,16 @@ class _DashboardPageState extends State<DashboardPage> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _rowsToday.length,
-                      separatorBuilder: (_, __) =>
-                          const Divider(height: 1),
+                      separatorBuilder: (_, __) => const Divider(height: 1),
                       itemBuilder: (ctx, i) {
                         final r = _rowsToday[i];
                         final name = (r['name'] ?? '-').toString();
-                        final pos =
-                            (r['position'] ?? '-').toString();
+                        final pos = (r['position'] ?? '-').toString();
                         final inAt = _formatTime(r['first_in_at']);
                         final outAt = _formatTime(r['last_out_at']);
-                        final late = int.tryParse(
-                                '${r['total_minutes_late'] ?? 0}') ??
-                            0;
+                        final late =
+                            int.tryParse('${r['total_minutes_late'] ?? 0}') ??
+                                0;
                         final ot = int.tryParse(
                                 '${r['total_overtime_minutes'] ?? 0}') ??
                             0;
@@ -600,9 +622,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           dense: true,
                           leading: CircleAvatar(
                             child: Icon(
-                              outAt != '-'
-                                  ? Icons.logout
-                                  : Icons.login,
+                              outAt != '-' ? Icons.logout : Icons.login,
                               size: 18,
                             ),
                           ),
@@ -650,7 +670,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.pie_chart_rounded, color: Colors.white, size: 20),
+                child: const Icon(Icons.pie_chart_rounded,
+                    color: Colors.white, size: 20),
               ),
               const SizedBox(width: 12),
               const Text(
@@ -699,15 +720,15 @@ class _DashboardPageState extends State<DashboardPage> {
     // Data untuk pie chart
     final hadir = _presentToday;
     final tidakHadir = _totalEmployees - _presentToday;
-    
+
     // Debug: print data
     print('DEBUG: Total Employees: $_totalEmployees, Present: $_presentToday');
     print('DEBUG: Hadir: $hadir, Tidak Hadir: $tidakHadir');
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 600;
-        
+
         if (isWide) {
           // Layout horizontal untuk layar lebar
           return Row(
@@ -748,7 +769,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildPieChart(int hadir, int tidakHadir) {
     final total = hadir + tidakHadir;
-    
+
     if (total == 0) {
       return Center(
         child: Container(
@@ -764,7 +785,10 @@ class _DashboardPageState extends State<DashboardPage> {
               const SizedBox(height: 12),
               const Text(
                 'Belum ada data pegawai',
-                style: TextStyle(color: Colors.black54, fontSize: 14, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -812,7 +836,8 @@ class _DashboardPageState extends State<DashboardPage> {
                           ),
                         ],
                       ),
-                      child: const Icon(Icons.check_circle, color: Color(0xFF4CAF50), size: 16),
+                      child: const Icon(Icons.check_circle,
+                          color: Color(0xFF4CAF50), size: 16),
                     ),
                     badgePositionPercentageOffset: 1.3,
                   ),
@@ -844,7 +869,8 @@ class _DashboardPageState extends State<DashboardPage> {
                           ),
                         ],
                       ),
-                      child: const Icon(Icons.cancel, color: Color(0xFFEF5350), size: 16),
+                      child: const Icon(Icons.cancel,
+                          color: Color(0xFFEF5350), size: 16),
                     ),
                     badgePositionPercentageOffset: 1.3,
                   ),
@@ -864,9 +890,11 @@ class _DashboardPageState extends State<DashboardPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildLegendItem(const Color(0xFF4CAF50), 'Hadir', hadir, Icons.check_circle_rounded),
+              _buildLegendItem(const Color(0xFF4CAF50), 'Hadir', hadir,
+                  Icons.check_circle_rounded),
               Container(width: 1, height: 40, color: Colors.grey.shade300),
-              _buildLegendItem(const Color(0xFFEF5350), 'Tidak Hadir', tidakHadir, Icons.cancel_rounded),
+              _buildLegendItem(const Color(0xFFEF5350), 'Tidak Hadir',
+                  tidakHadir, Icons.cancel_rounded),
             ],
           ),
         ),
@@ -951,7 +979,7 @@ class _DashboardPageState extends State<DashboardPage> {
             Expanded(
               child: _buildStatCard(
                 'Total Lembur',
-                '${_overtimeToday} menit',
+                '$_overtimeToday menit',
                 Icons.work_history_rounded,
                 const Color(0xFF9C27B0),
               ),
@@ -962,7 +990,8 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+      String label, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -1011,7 +1040,6 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-
 }
 
 // ─────────────────────────────────────────────────────────────────

@@ -1,6 +1,5 @@
 // lib/pages/mandor_dashboard_page.dart
 import 'dart:async';
-import 'dart:ui' show FontFeature;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'unified_login_page.dart';
@@ -48,6 +47,7 @@ class _MandorDashboardPageState extends State<MandorDashboardPage> {
     _clockTimer.cancel();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     final mandorName = widget.mandorData['name'] ?? 'Mandor';
@@ -152,7 +152,8 @@ class _MandorDashboardPageState extends State<MandorDashboardPage> {
                         children: [
                           Row(
                             children: const [
-                              Icon(Icons.calendar_today, color: Colors.white70, size: 14),
+                              Icon(Icons.calendar_today,
+                                  color: Colors.white70, size: 14),
                               SizedBox(width: 6),
                               Text(
                                 'Tanggal',
@@ -181,7 +182,8 @@ class _MandorDashboardPageState extends State<MandorDashboardPage> {
                       children: [
                         Row(
                           children: const [
-                            Icon(Icons.access_time, color: Colors.white70, size: 14),
+                            Icon(Icons.access_time,
+                                color: Colors.white70, size: 14),
                             SizedBox(width: 6),
                             Text(
                               'Waktu',
@@ -194,7 +196,8 @@ class _MandorDashboardPageState extends State<MandorDashboardPage> {
                         ),
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
