@@ -1,14 +1,11 @@
 // lib/services/location_service.dart
+import 'dart:async';
 import 'dart:convert';
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
 /// Service untuk mendapatkan lokasi GPS dan reverse geocoding
 class LocationService {
-  // Distancematrix.ai Geocoding API Key
   static const String _apiKey =
       '7t0bBS9rSfXtKQFsewtZ1gTafCMRt6BdCjLJgI83lFE9PmEKjfisCxnIz45EVVyr';
 
@@ -51,42 +48,31 @@ class LocationService {
     );
   }
 
-  /// Reverse geocoding menggunakan Distancematrix.ai Geocoding API
-  /// Konversi koordinat (lat, lng) → nama alamat lengkap
+  /// Reverse geocoding menggunakan Distancematrix.ai
+  /// Menggunakan http package (async) - bekerja di web dan mobile
   static Future<String> getAddressFromCoordinates(
     double latitude,
     double longitude,
   ) async {
     try {
-      final url = 'https://api.distancematrix.ai/maps/api/geocode/json'
-          '?latlng=$latitude,$longitude'
-          '&key=$_apiKey';
+      final uri = Uri.parse(
+        'https://api.distancematrix.ai/maps/api/geocode/json'
+        '?latlng=$latitude,$longitude'
+        '&key=$_apiKey',
+      );
 
-      String responseBody;
+      final response = await http.get(uri, headers: {
+        'Accept': 'application/json'
+      }).timeout(const Duration(seconds: 15));
 
-      if (kIsWeb) {
-        // Gunakan XMLHttpRequest untuk Flutter Web agar CORS bekerja
-        final request = html.HttpRequest();
-        request.open('GET', url, async: false);
-        request.setRequestHeader('Accept', 'application/json');
-        request.send();
-        responseBody = request.responseText ?? '';
-      } else {
-        // Mobile: gunakan http package biasa
-        final uri = Uri.parse(url);
-        final response = await http.get(uri, headers: {
-          'Accept': 'application/json'
-        }).timeout(const Duration(seconds: 10));
-        responseBody = response.body;
-      }
-
-      if (responseBody.isEmpty) {
+      if (response.statusCode != 200) {
         return _fallbackAddress(latitude, longitude);
       }
 
-      final data = json.decode(responseBody);
-      final status = data['status'];
-      if (status != 'OK') {
+      final data = json.decode(response.body);
+
+      // Cek status API
+      if (data['status'] != 'OK') {
         return _fallbackAddress(latitude, longitude);
       }
 
@@ -96,7 +82,7 @@ class LocationService {
         return _fallbackAddress(latitude, longitude);
       }
 
-      // Ambil formatted_address dari hasil pertama (paling akurat)
+      // Ambil formatted_address (paling lengkap)
       final formattedAddress =
           results[0]['formatted_address']?.toString() ?? '';
       if (formattedAddress.isNotEmpty) {
@@ -109,6 +95,8 @@ class LocationService {
         return _parseAddressComponents(components);
       }
 
+      return _fallbackAddress(latitude, longitude);
+    } on TimeoutException {
       return _fallbackAddress(latitude, longitude);
     } catch (e) {
       return _fallbackAddress(latitude, longitude);
@@ -130,7 +118,9 @@ class LocationService {
 
       if (types.contains('route')) route = longName;
       if (types.contains('sublocality') ||
-          types.contains('sublocality_level_1')) sublocality = longName;
+          types.contains('sublocality_level_1')) {
+        sublocality = longName;
+      }
       if (types.contains('locality')) locality = longName;
       if (types.contains('administrative_area_level_2')) adminArea2 = longName;
       if (types.contains('administrative_area_level_1')) adminArea1 = longName;
@@ -146,7 +136,7 @@ class LocationService {
     return parts.isNotEmpty ? parts.join(', ') : 'Lokasi tidak dikenali';
   }
 
-  /// Fallback jika API gagal - tampilkan koordinat
+  /// Fallback jika API gagal
   static String _fallbackAddress(double lat, double lng) {
     return 'Lat: ${lat.toStringAsFixed(6)}, Lng: ${lng.toStringAsFixed(6)}';
   }
