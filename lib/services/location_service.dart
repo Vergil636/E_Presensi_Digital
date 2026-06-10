@@ -1,5 +1,8 @@
 // lib/services/location_service.dart
 import 'dart:convert';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
@@ -55,45 +58,55 @@ class LocationService {
     double longitude,
   ) async {
     try {
-      final uri = Uri.parse(
-        'https://api.distancematrix.ai/maps/api/geocode/json'
-        '?latlng=$latitude,$longitude'
-        '&key=$_apiKey',
-      );
+      final url = 'https://api.distancematrix.ai/maps/api/geocode/json'
+          '?latlng=$latitude,$longitude'
+          '&key=$_apiKey';
 
-      final response = await http.get(uri, headers: {
-        'Accept': 'application/json'
-      }).timeout(const Duration(seconds: 10));
+      String responseBody;
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+      if (kIsWeb) {
+        // Gunakan XMLHttpRequest untuk Flutter Web agar CORS bekerja
+        final request = html.HttpRequest();
+        request.open('GET', url, async: false);
+        request.setRequestHeader('Accept', 'application/json');
+        request.send();
+        responseBody = request.responseText ?? '';
+      } else {
+        // Mobile: gunakan http package biasa
+        final uri = Uri.parse(url);
+        final response = await http.get(uri, headers: {
+          'Accept': 'application/json'
+        }).timeout(const Duration(seconds: 10));
+        responseBody = response.body;
+      }
 
-        // Cek status API
-        final status = data['status'];
-        if (status != 'OK') {
-          return _fallbackAddress(latitude, longitude);
-        }
-
-        // Distancematrix.ai pakai key "result" (bukan "results")
-        final results = data['result'] as List?;
-        if (results == null || results.isEmpty) {
-          return _fallbackAddress(latitude, longitude);
-        }
-
-        // Ambil formatted_address dari hasil pertama (paling akurat)
-        final formattedAddress =
-            results[0]['formatted_address']?.toString() ?? '';
-        if (formattedAddress.isNotEmpty) {
-          return formattedAddress;
-        }
-
-        // Fallback: parse dari address_components
-        final components = results[0]['address_components'] as List?;
-        if (components != null && components.isNotEmpty) {
-          return _parseAddressComponents(components);
-        }
-
+      if (responseBody.isEmpty) {
         return _fallbackAddress(latitude, longitude);
+      }
+
+      final data = json.decode(responseBody);
+      final status = data['status'];
+      if (status != 'OK') {
+        return _fallbackAddress(latitude, longitude);
+      }
+
+      // Distancematrix.ai pakai key "result" (bukan "results")
+      final results = data['result'] as List?;
+      if (results == null || results.isEmpty) {
+        return _fallbackAddress(latitude, longitude);
+      }
+
+      // Ambil formatted_address dari hasil pertama (paling akurat)
+      final formattedAddress =
+          results[0]['formatted_address']?.toString() ?? '';
+      if (formattedAddress.isNotEmpty) {
+        return formattedAddress;
+      }
+
+      // Fallback: parse dari address_components
+      final components = results[0]['address_components'] as List?;
+      if (components != null && components.isNotEmpty) {
+        return _parseAddressComponents(components);
       }
 
       return _fallbackAddress(latitude, longitude);
