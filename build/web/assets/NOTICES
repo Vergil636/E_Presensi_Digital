@@ -6846,10 +6846,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 --------------------------------------------------------------------------------
-geocoding
-geocoding_android
-geocoding_ios
-geocoding_platform_interface
 geolocator
 geolocator_android
 geolocator_apple

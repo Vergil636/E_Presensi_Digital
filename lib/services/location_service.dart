@@ -5,10 +5,6 @@ import 'package:http/http.dart' as http;
 
 /// Service untuk mendapatkan lokasi GPS dan reverse geocoding
 class LocationService {
-  // Distancematrix.ai Geocoding API Key
-  static const String _apiKey =
-      '7t0bBS9rSfXtKQFsewtZ1gTafCMRt6BdCjLJgI83lFE9PmEKjfisCxnIz45EVVyr';
-
   /// Cek apakah location service aktif
   static Future<bool> isLocationServiceEnabled() async {
     return await Geolocator.isLocationServiceEnabled();
@@ -48,49 +44,44 @@ class LocationService {
     );
   }
 
-  /// Reverse geocoding menggunakan Distancematrix.ai Geocoding API
-  /// Konversi koordinat (lat, lng) → nama alamat lengkap
+  /// Reverse geocoding menggunakan OpenStreetMap Nominatim API
+  /// Gratis, tanpa API key, support Bahasa Indonesia
   static Future<String> getAddressFromCoordinates(
     double latitude,
     double longitude,
   ) async {
     try {
       final uri = Uri.parse(
-        'https://api.distancematrix.ai/maps/api/geocode/json'
-        '?latlng=$latitude,$longitude'
-        '&key=$_apiKey',
+        'https://nominatim.openstreetmap.org/reverse'
+        '?format=json'
+        '&lat=$latitude'
+        '&lon=$longitude'
+        '&zoom=16'
+        '&addressdetails=1'
+        '&accept-language=id',
       );
 
-      final response = await http.get(uri, headers: {
-        'Accept': 'application/json'
-      }).timeout(const Duration(seconds: 10));
+      final response = await http.get(
+        uri,
+        headers: {
+          // Nominatim mensyaratkan User-Agent yang valid
+          'User-Agent': 'EAbsensiCvTanjungAgung/1.0',
+          'Accept-Language': 'id',
+        },
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        // Cek status API
-        final status = data['status'];
-        if (status != 'OK') {
-          return _fallbackAddress(latitude, longitude);
-        }
-
-        // Distancematrix.ai pakai key "result" (bukan "results")
-        final results = data['result'] as List?;
-        if (results == null || results.isEmpty) {
-          return _fallbackAddress(latitude, longitude);
-        }
-
-        // Ambil formatted_address dari hasil pertama (paling akurat)
-        final formattedAddress =
-            results[0]['formatted_address']?.toString() ?? '';
-        if (formattedAddress.isNotEmpty) {
-          return formattedAddress;
-        }
-
-        // Fallback: parse dari address_components
-        final components = results[0]['address_components'] as List?;
-        if (components != null && components.isNotEmpty) {
-          return _parseAddressComponents(components);
+        // Ambil display_name (nama lengkap lokasi)
+        final displayName = data['display_name']?.toString() ?? '';
+        if (displayName.isNotEmpty) {
+          // Format ulang: ambil komponen yang penting saja
+          final address = data['address'] as Map<String, dynamic>?;
+          if (address != null) {
+            return _buildAddress(address);
+          }
+          return displayName;
         }
 
         return _fallbackAddress(latitude, longitude);
@@ -102,38 +93,48 @@ class LocationService {
     }
   }
 
-  /// Parse address_components menjadi string alamat
-  static String _parseAddressComponents(List components) {
-    String route = '';
-    String sublocality = '';
-    String locality = '';
-    String adminArea2 = '';
-    String adminArea1 = '';
-
-    for (final comp in components) {
-      final types =
-          (comp['types'] as List?)?.map((e) => e.toString()).toList() ?? [];
-      final longName = comp['long_name']?.toString() ?? '';
-
-      if (types.contains('route')) route = longName;
-      if (types.contains('sublocality') ||
-          types.contains('sublocality_level_1')) sublocality = longName;
-      if (types.contains('locality')) locality = longName;
-      if (types.contains('administrative_area_level_2')) adminArea2 = longName;
-      if (types.contains('administrative_area_level_1')) adminArea1 = longName;
-    }
-
+  /// Format address dari komponen Nominatim menjadi string yang rapi
+  /// Contoh hasil: "Jl. Raya Bogor, Mulyamekar, Purwakarta, Jawa Barat"
+  static String _buildAddress(Map<String, dynamic> address) {
     final parts = <String>[];
-    if (route.isNotEmpty) parts.add(route);
-    if (sublocality.isNotEmpty) parts.add(sublocality);
-    if (locality.isNotEmpty) parts.add(locality);
-    if (adminArea2.isNotEmpty) parts.add(adminArea2);
-    if (adminArea1.isNotEmpty) parts.add(adminArea1);
 
-    return parts.isNotEmpty ? parts.join(', ') : 'Lokasi tidak dikenali';
+    // Nama jalan
+    final road = address['road']?.toString() ??
+        address['pedestrian']?.toString() ??
+        address['path']?.toString() ??
+        '';
+    if (road.isNotEmpty) parts.add(road);
+
+    // Desa / Kelurahan
+    final village = address['village']?.toString() ??
+        address['suburb']?.toString() ??
+        address['neighbourhood']?.toString() ??
+        address['hamlet']?.toString() ??
+        '';
+    if (village.isNotEmpty) parts.add(village);
+
+    // Kecamatan
+    final district = address['city_district']?.toString() ??
+        address['district']?.toString() ??
+        '';
+    if (district.isNotEmpty) parts.add(district);
+
+    // Kota / Kabupaten
+    final city = address['city']?.toString() ??
+        address['town']?.toString() ??
+        address['county']?.toString() ??
+        '';
+    if (city.isNotEmpty) parts.add(city);
+
+    // Provinsi
+    final province = address['state']?.toString() ?? '';
+    if (province.isNotEmpty) parts.add(province);
+
+    if (parts.isEmpty) return 'Lokasi tidak dikenali';
+    return parts.join(', ');
   }
 
-  /// Fallback jika API gagal - tampilkan koordinat
+  /// Fallback jika API gagal
   static String _fallbackAddress(double lat, double lng) {
     return 'Lat: ${lat.toStringAsFixed(6)}, Lng: ${lng.toStringAsFixed(6)}';
   }
